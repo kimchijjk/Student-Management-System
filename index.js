@@ -25,8 +25,10 @@ app.use(passport.session())
 
 app.use('/api', router);
 app.use('/auth', adminRouter)
+app.use(express.static('public'));
+
 app.get('/', (req, res) => {
-    res.redirect('/api/students');
+    res.sendFile(__dirname + '/public/index.html');
 });
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`);
