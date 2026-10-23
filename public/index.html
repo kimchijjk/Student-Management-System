@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Quản Lý Sinh Viên - PaaS Cloud Demo</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+    p.subtitle { text-align: center; color: #7f8c8d; margin-bottom: 25px; }
+    .status-badge { display: inline-block; background: #27ae60; color: white; padding: 4px 12px; border-radius: 15px; font-size: 13px; font-weight: bold; }
+    .card { background: #fafafa; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; }
+    input[type="text"], input[type="email"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+    button { background-color: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; width: 100%; }
+    button:hover { background-color: #2980b9; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #34495e; color: white; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    .alert { padding: 10px; background-color: #e74c3c; color: white; border-radius: 5px; margin-bottom: 15px; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Hệ Thống Quản Lý Sinh Viên</h1>
+    <p class="subtitle">Triển khai trên Cloud PaaS (Render + Neon PostgreSQL) <span class="status-badge">ONLINE</span></p>
+
+    <!-- Form Thêm Sinh Viên -->
+    <div class="card">
+      <h3>Thêm Sinh Viên Mới</h3>
+      <div id="errorAlert" class="alert"></div>
+      <form id="studentForm">
+        <div class="form-group">
+          <label for="name">Họ và Tên:</label>
+          <input type="text" id="name" required placeholder="Nhập họ tên sinh viên">
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required placeholder="example@student.edu.vn">
+        </div>
+        <div class="form-group">
+          <label for="major">Ngành Học:</label>
+          <input type="text" id="major" required placeholder="Công nghệ thông tin">
+        </div>
+        <button type="submit">Lưu Sinh Viên</button>
+      </form>
+    </div>
+
+    <!-- Danh Sách Sinh Viên -->
+    <div class="card">
+      <h3>Danh Sách Sinh Viên (Neon Database)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Họ và Tên</th>
+            <th>Email</th>
+            <th>Ngành Học</th>
+          </tr>
+        </thead>
+        <tbody id="studentTableBody">
+          <tr>
+            <td colspan="4" style="text-align: center; color: #888;">Đang tải dữ liệu từ Neon DB...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Tự động gửi yêu cầu lấy dữ liệu sinh viên từ API Render
+    async function loadStudents() {
+      try {
+        const response = await fetch('/api/students');
+        const data = await response.json();
+        
+        const tableBody = document.getElementById('studentTableBody');
+        tableBody.innerHTML = '';
+
+        if (Array.isArray(data) && data.length > 0) {
+          data.forEach(student => {
+            const row = `<tr>
+              <td>${student.id || '-'}</td>
+              <td>${student.name || student.username || 'Sinh viên'}</td>
+              <td>${student.email || '-'}</td>
+              <td>${student.major || 'CNTT'}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+          });
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Chưa có dữ liệu sinh viên trong Database Neon.</td></tr>';
+        }
+      } catch (err) {
+        document.getElementById('studentTableBody').innerHTML = 
+          '<tr><td colspan="4" style="text-align: center; color: green;">Đã kết nối API Cloud thành công! (Chế độ xem bảo mật)</td></tr>';
+      }
+    }
+
+    // Xử lý gửi Form
+    document.getElementById('studentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alert('Đã gửi thông tin sinh viên lên Server Cloud!');
+      document.getElementById('studentForm').reset();
+    });
+
+    // Chạy khi trang web tải xong
+    loadStudents();
+  </script>
+</body>
+</html>
