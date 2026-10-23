@@ -25,6 +25,9 @@ app.use(passport.session())
 
 app.use('/api', router);
 app.use('/auth', adminRouter)
+app.get('/', (req, res) => {
+    res.redirect('/api/students');
+});
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`);
 });
